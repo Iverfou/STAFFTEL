@@ -357,11 +357,11 @@
 <div id="toast"></div>
 
 <script>
-const API = '/api/stafftel';
+const api = '/api/stafftel';
 let staffData = [];
 
 // ── Appel proxy ─────────────────────────────────────────────────────────────
-async function callApi(action, extra = {}) {
+async function callapi(action, extra = {}) {
   const res = await fetch(api, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -385,7 +385,7 @@ function toast(msg, isError = false) {
 // ── Chargement initial ───────────────────────────────────────────────────────
 async function loadDashboard() {
   try {
-    const { data } = await callApi('load_dashboard');
+    const { data } = await callapi('load_dashboard');
 
     // Stats
     ['staff','time','ocupacion','rooms'].forEach(id => {
@@ -475,7 +475,7 @@ async function generarPlanning() {
   btn.textContent = '⏳ Generando…';
   document.getElementById('planningLoader').style.display = 'block';
   try {
-    await callApi('generar_planning');
+    await callapi('generar_planning');
     toast('Planning generado correctamente');
     await loadDashboard();
   } catch (e) {
