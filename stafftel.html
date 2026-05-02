@@ -362,7 +362,7 @@ let staffData = [];
 
 // ── Appel proxy ─────────────────────────────────────────────────────────────
 async function callApi(action, extra = {}) {
-  const res = await fetch(API, {
+  const res = await fetch(api, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action, ...extra })
