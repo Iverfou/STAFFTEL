@@ -499,7 +499,7 @@ async function reportarAusencia() {
   const btn = document.getElementById('btnEnviar');
   btn.disabled = true;
   try {
-    await callApi('reportar_ausencia', { staffId, motivo });
+    await callapi('reportar_ausencia', { staffId, motivo });
     toast('Ausencia reportada correctamente');
     closeModal();
     document.getElementById('inputMotivo').value = '';
