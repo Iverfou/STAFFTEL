@@ -361,7 +361,7 @@ const api = '/api/stafftel';
 let staffData = [];
 
 // ── Appel proxy ─────────────────────────────────────────────────────────────
-async function callapi(action, extra = {}) {
+async function callApi(action, extra = {}) {
   const res = await fetch(api, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
