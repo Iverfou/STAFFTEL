@@ -529,10 +529,10 @@ if (stats) {
         document.getElementById('statHabitaciones').textContent = totalHab;
       }
 
-      showToast('✅ Planning generado y enviado por WhatsApp', 'success');
-    } else {
-      renderEmpty('No hay habitaciones a limpiar hoy 🎉');
-      showToast('ℹ️ No hay tareas para esta fecha', 'warn');
+    
+    showToast('Planning generado correctamente', 'success');
+      renderEmpty('No hay habitaciones a limpiar hoy');
+showToast('No hay tareas para esta fecha', 'warn');
     }
   } catch(e) {
     renderError(e.message);
