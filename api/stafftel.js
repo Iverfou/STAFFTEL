@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
 
       const [staffData, roomsData, planningData] = await Promise.all([
         airtableFetch(TABLES.staff),
-        airtableFetch(TABLES.rooms),
+        airtableFetch(TABLES.rooms, '?filterByFormula=IS_SAME({Date},TODAY(),%27day%27)'),
         airtableFetch(TABLES.planning),
       ]);
 
@@ -84,6 +84,7 @@ module.exports = async function handler(req, res) {
         priorite:  r.fields['Priorité']         || '',
         nettoyage: r.fields['Nettoyage_Requis'] || false,
         employe:   r.fields['Employé']          || '',
+        date: r.fields['Date'] || '',
       }));
 
       const todayStr = new Date().toISOString().split('T')[0];
