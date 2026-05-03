@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
 
       const [staffData, roomsData, planningData] = await Promise.all([
         airtableFetch(TABLES.staff),
-        airtableFetch(TABLES.rooms, '?filterByFormula=IS_SAME({Date},TODAY(),%27day%27)'),
+        airtableFetch(TABLES.rooms),
         airtableFetch(TABLES.planning),
       ]);
 
