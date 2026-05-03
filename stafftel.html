@@ -469,7 +469,10 @@ function populateSelect(staff) {
 }
 
 // ── Generar Planning ─────────────────────────────────────────────────────────
+let planningEnCours = false;
 async function generarPlanning() {
+  if (planningEnCours) return;
+  planningEnCours = true;
   const btn = document.getElementById('btnGenerar');
   btn.disabled = true;
   btn.textContent = '⏳ Generando…';
@@ -507,7 +510,10 @@ async function reportarAusencia() {
   } catch (e) {
     toast('Error: ' + e.message, true);
   } finally {
+    planningEnCours = false;
     btn.disabled = false;
+    btn.textContent = '🤖 Generar Planning';
+    document.getElementById('planningLoader').style.display = 'none';
   }
 }
 
