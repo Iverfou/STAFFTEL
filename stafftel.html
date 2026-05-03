@@ -495,8 +495,8 @@ async function generarPlanning() {
   showLoading();
 
   try {
-    console.log('res complet:', JSON.stringify(res));
     const res = await callAPI({ action: 'generate_planning', date: currentDate });
+    console.log('res complet:', JSON.stringify(res));
 
     if (res?.data?.asignaciones?.length) {
       currentPlanning = res.data.asignaciones;
