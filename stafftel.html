@@ -503,12 +503,24 @@ async function generarPlanning() {
       renderPlanning(currentPlanning);
 
       // Update stats from planning response if available
-      if (res.data.stats) {
-        const d = res.data.stats;
-        document.getElementById('statStaff').textContent = d.staffDisponible ?? currentPlanning.length;
-        document.getElementById('statTiempo').textContent = d.totalMinutos ? `${d.totalMinutos}m` : '—';
-        document.getElementById('statHabitaciones').textContent = d.habitacionesALimpiar ?? '—';
-      } else {
+      // Update stats from planning response if available
+const stats = res.data?.stats;
+if (stats) {
+  document.getElementById('statStaff').textContent = stats.staffDisponible ?? currentPlanning.length;
+  document.getElementById('statTiempo').textContent = stats.totalMinutos ? `${stats.totalMinutos}m` : '—';
+  document.getElementById('statHabitaciones').textContent = stats.habitacionesALimpiar ?? '—';
+  const ocu = stats.ocupacion ?? Math.round((stats.habitacionesALimpiar / 43) * 100);
+  document.getElementById('statOcupacion').textContent = ocu + '%';
+  document.getElementById('statOcupacionSub').textContent = `${stats.habitacionesALimpiar} / 43 habitaciones`;
+} else {
+  const totalMin = currentPlanning.reduce((s, a) => s + (a.tiempo_estimado_min || 0), 0);
+  const totalHab = currentPlanning.reduce((s, a) => s + (a.habitaciones?.length || 0), 0);
+  document.getElementById('statStaff').textContent = currentPlanning.length;
+  document.getElementById('statTiempo').textContent = totalMin + 'm';
+  document.getElementById('statHabitaciones').textContent = totalHab;
+  const ocu = Math.round((totalHab / 43) * 100);
+  document.getElementById('statOcupacion').textContent = ocu + '%';
+}
         // Compute from planning
         const totalMin = currentPlanning.reduce((s, a) => s + (a.tiempo_estimado_min || 0), 0);
         const totalHab = currentPlanning.reduce((s, a) => s + (a.habitaciones?.length || 0), 0);
