@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StaffTel Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3347;
+    --accent: #f5c842;
+    --accent2: #3ecf8e;
+    --danger: #ff5e5e;
+    --warn: #ff9f43;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Mono', monospace; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--text); opacity: 0.5; font-weight: 600; }
+
+  .date-controls { display: flex; align-items: center; gap: 10px; }
+  .date-controls label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  #datePicker {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #datePicker:focus { outline: none; border-color: var(--accent); }
+  .btn-today {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-today:hover { border-color: var(--accent); color: var(--accent); }
+
+  .actions { display: flex; gap: 10px; }
+  .btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: var(--radius);
+    font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #0f1117; }
+  .btn-primary:hover:not(:disabled) { background: #f0bc20; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-warn { background: var(--surface2); color: var(--warn); border: 1px solid var(--warn); }
+  .btn-warn:hover { background: rgba(255,159,67,0.1); }
+
+  .main { padding: 28px 32px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .stat-card.green::before { background: var(--accent2); }
+  .stat-card.warn::before  { background: var(--warn); }
+  .stat-card.red::before   { background: var(--danger); }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .date-badge { font-size: 11px; color: var(--accent); background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.3); padding: 4px 10px; border-radius: 20px; }
+
+  .planning-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .planning-table th { background: var(--surface2); padding: 12px 16px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 500; }
+  .planning-table td { padding: 14px 16px; border-top: 1px solid var(--border); font-size: 13px; }
+  .planning-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .badge-pending  { background: rgba(255,159,67,0.15); color: var(--warn); }
+  .badge-done     { background: rgba(62,207,142,0.15); color: var(--accent2); }
+  .badge-progress { background: rgba(245,200,66,0.15); color: var(--accent); }
+
+  .rooms-list { display: flex; flex-wrap: wrap; gap: 4px; }
+  .room-tag { background: var(--surface2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 6px; font-size: 11px; color: var(--accent); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 400px; max-width: 95vw; }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .form-group select, .form-group textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; border-radius: 8px; }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+  .btn-danger { background: var(--danger); border: none; color: #fff; font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
+
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 20px; font-size: 13px; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; z-index: 200; max-width: 340px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 3px solid var(--accent2); }
+  .toast.error   { border-left: 3px solid var(--danger); }
+  .toast.warn    { border-left: 3px solid var(--warn); }
+
+  @media (max-width: 768px) {
+    .header { padding: 16px; }
+    .main { padding: 16px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .actions { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🏨 StaffTel <span>Manager</span></div>
+  <div class="date-controls">
+    <label>Fecha</label>
+    <input type="date" id="datePicker">
+    <button class="btn-today" onclick="setToday()">Hoy</button>
+  </div>
+  <div class="actions">
+    <button class="btn btn-primary" id="btnGenerar" onclick="generarPlanning()">
+      🤖 Generar Planning
+    </button>
+    <button class="btn btn-warn" onclick="openModal()">
+      ⚠️ Reportar Ausencia
+    </button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="stats">
+    <div class="stat-card green">
+      <div class="stat-label">Staff Disponible</div>
+      <div class="stat-value" id="statStaff">—</div>
+      <div class="stat-sub" id="statStaffSub">personas hoy</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Tiempo Total</div>
+      <div class="stat-value" id="statTiempo">—</div>
+      <div class="stat-sub">minutos estimados</div>
+    </div>
+    <div class="stat-card warn">
+      <div class="stat-label">Ocupacion Hoy</div>
+      <div class="stat-value" id="statOcupacion">—</div>
+      <div class="stat-sub" id="statOcupacionSub">de 43 habitaciones</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">A Limpiar</div>
+      <div class="stat-value" id="statHabitaciones">—</div>
+      <div class="stat-sub">habitaciones</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="section-title">Planning</div>
+    <div class="date-badge" id="dateBadge">—</div>
+  </div>
+
+  <div id="planningContainer">
+    <div class="empty-state">
+      <div class="empty-icon">🤖</div>
+      Haz clic en <strong>Generar Planning</strong> para distribuir las habitaciones.
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Reportar Ausencia</h3>
+    <div class="form-group">
+      <label>Personal</label>
+      <select id="staffSelect">
+        <option value="">Seleccionar...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Motivo</label>
+      <textarea id="motivoInput" placeholder="Enfermedad, emergencia familiar..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-danger" onclick="reportarAusencia()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// STATE
+let planningEnCours = false;
+let currentPlanning = [];
+let currentDate = '';
+
+// INIT
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('datePicker').value = today;
+  currentDate = today;
+  updateDateBadge(today);
+
+  document.getElementById('datePicker').addEventListener('change', function(e) {
+    currentDate = e.target.value;
+    updateDateBadge(currentDate);
+    currentPlanning = [];
+    renderPlanning([]);
+  });
+}
+
+function setToday() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('datePicker').value = today;
+  currentDate = today;
+  updateDateBadge(today);
+}
+
+function updateDateBadge(date) {
+  if (!date) return;
+  const d = new Date(date + 'T12:00:00');
+  const label = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('dateBadge').textContent = label;
+}
+
+// GENERAR PLANNING
+async function generarPlanning() {
+  if (planningEnCours) {
+    showToast('Planning ya en progreso...', 'warn');
+    return;
+  }
+  planningEnCours = true;
+  const btn = document.getElementById('btnGenerar');
+  btn.disabled = true;
+  btn.textContent = 'Generando...';
+  showLoading();
+
+  try {
+    const res = await callAPI({ action: 'generate_planning', date: currentDate });
+
+    if (res && res.data && res.data.asignaciones && res.data.asignaciones.length) {
+      currentPlanning = res.data.asignaciones;
+      renderPlanning(currentPlanning);
+
+      const stats = res.data.stats;
+      if (stats) {
+        document.getElementById('statStaff').textContent = stats.staffDisponible !== undefined ? stats.staffDisponible : currentPlanning.length;
+        document.getElementById('statTiempo').textContent = stats.totalMinutos ? stats.totalMinutos + 'm' : '—';
+        document.getElementById('statHabitaciones').textContent = stats.habitacionesALimpiar !== undefined ? stats.habitacionesALimpiar : '—';
+        const ocu = stats.ocupacion !== undefined ? stats.ocupacion : Math.round((stats.habitacionesALimpiar / 43) * 100);
+        document.getElementById('statOcupacion').textContent = ocu + '%';
+        document.getElementById('statOcupacionSub').textContent = (stats.habitacionesALimpiar || '—') + ' / 43 habitaciones';
+
+        if (stats.staffNombres && stats.staffNombres.length) {
+          const sel = document.getElementById('staffSelect');
+          sel.innerHTML = '<option value="">Seleccionar...</option>';
+          stats.staffNombres.forEach(function(n) {
+            sel.innerHTML += '<option value="' + n + '">' + n + '</option>';
+          });
+        }
+      } else {
+        const totalMin = currentPlanning.reduce(function(s, a) { return s + (a.tiempo_estimado_min || 0); }, 0);
+        const totalHab = currentPlanning.reduce(function(s, a) { return s + (a.habitaciones ? a.habitaciones.length : 0); }, 0);
+        document.getElementById('statStaff').textContent = currentPlanning.length;
+        document.getElementById('statTiempo').textContent = totalMin + 'm';
+        document.getElementById('statHabitaciones').textContent = totalHab;
+        document.getElementById('statOcupacion').textContent = Math.round((totalHab / 43) * 100) + '%';
+      }
+
+      showToast('Planning generado correctamente', 'success');
+    } else {
+      renderEmpty('No hay habitaciones a limpiar hoy');
+      showToast('No hay tareas para esta fecha', 'warn');
+    }
+  } catch(e) {
+    renderError(e.message);
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    planningEnCours = false;
+    btn.disabled = false;
+    btn.textContent = '🤖 Generar Planning';
+  }
+}
+
+// RENDER
+function showLoading() {
+  document.getElementById('planningContainer').innerHTML =
+    '<div class="empty-state"><div class="spinner"></div>Claude esta distribuyendo las habitaciones...</div>';
+}
+
+function renderEmpty(msg) {
+  document.getElementById('planningContainer').innerHTML =
+    '<div class="empty-state"><div class="empty-icon">✨</div>' + msg + '</div>';
+}
+
+function renderError(msg) {
+  document.getElementById('planningContainer').innerHTML =
+    '<div class="empty-state"><div class="empty-icon">❌</div>Error: ' + msg + '</div>';
+}
+
+function renderPlanning(asignaciones) {
+  if (!asignaciones || !asignaciones.length) {
+    renderEmpty('No hay planning generado para esta fecha.');
+    return;
+  }
+
+  var rows = asignaciones.map(function(a) {
+    var rooms = (a.habitaciones || []).map(function(r) {
+      return '<span class="room-tag">' + r + '</span>';
+    }).join('');
+    var statut = a.statut || 'Pendiente';
+    var badge = statut === 'Completado' ? 'badge-done' : statut === 'En Progreso' ? 'badge-progress' : 'badge-pending';
+    
+    // Indice de production
+    var cargaHtml = '—';
+    if (a.indice_production !== null && a.indice_production !== undefined) {
+      var c = a.indice_production;
+      var color = c >= 90 ? '#3ecf8e' : c >= 70 ? '#f5c842' : '#ff5e5e';
+      cargaHtml = '<span style="font-weight:700;color:' + color + '">' + c + '%</span>';
+    }
+    
+    return '<tr><td><strong>' + (a.nombre || '—') + '</strong></td>' +
+      '<td><div class="rooms-list">' + (rooms || '—') + '</div></td>' +
+      '<td>' + (a.horario_inicio || '—') + '</td>' +
+      '<td>' + (a.tiempo_estimado_min || '—') + ' min</td>' +
+      '<td>' + cargaHtml + '</td>' +
+      '<td><span class="badge ' + badge + '">' + statut + '</span></td></tr>';
+  }).join('');
+
+  document.getElementById('planningContainer').innerHTML =
+    '<table class="planning-table"><thead><tr>' +
+    '<th>Personal</th><th>Habitaciones</th><th>Hora inicio</th><th>Tiempo</th><th>Carga</th><th>Estado</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+// MODAL
+function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+async function reportarAusencia() {
+  var staff  = document.getElementById('staffSelect').value;
+  var motivo = document.getElementById('motivoInput').value.trim();
+  if (!staff)  { showToast('Selecciona un empleado', 'warn'); return; }
+  if (!motivo) { showToast('Indica el motivo', 'warn'); return; }
+  try {
+    await callAPI({ action: 'report_absence', staff: staff, motivo: motivo, date: currentDate });
+    showToast('Ausencia de ' + staff + ' registrada', 'success');
+    closeModal();
+    document.getElementById('staffSelect').value = '';
+    document.getElementById('motivoInput').value = '';
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// API
+async function callAPI(payload) {
+  var res = await fetch('/api/stafftel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) {
+    var err = await res.json().catch(function() { return { error: 'Network error' }; });
+    throw new Error(err.error || 'HTTP ' + res.status);
+  }
+  return res.json();
+}
+
+// TOAST
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'success') + ' show';
+  setTimeout(function() { t.classList.remove('show'); }, 4000);
+}
+
+// BOOT
+init();
+</script>
+</body>
+</html>
