@@ -344,9 +344,14 @@ function renderPlanning(asignaciones) {
       var c = a.indice_production;
       var color = c >= 90 ? '#3ecf8e' : c >= 70 ? '#f5c842' : '#ff5e5e';
       cargaHtml = '<span style="font-weight:700;color:' + color + '">' + c + '%</span>';
-    }
+      var alertHtml = '';
+if (a.indice_production > 100) {
+  alertHtml = ' <span style="color:#ff5e5e;font-size:10px;">⚠ SURCHARGE</span>';
+} else if (a.indice_production > 90) {
+  alertHtml = ' <span style="color:#ff9f43;font-size:10px;">⚡ Carga alta</span>';
+}
     
-    return '<tr><td><strong>' + (a.nombre || '—') + '</strong></td>' +
+    return '<tr><td><strong>' + (a.nombre || '—') + '</strong>' + alertHtml + '</td>' +
       '<td><div class="rooms-list">' + (rooms || '—') + '</div></td>' +
       '<td>' + (a.horario_inicio || '—') + '</td>' +
       '<td>' + (a.tiempo_estimado_min || '—') + ' min</td>' +
