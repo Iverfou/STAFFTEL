@@ -348,7 +348,8 @@ function renderPlanning(asignaciones) {
 if (a.indice_production > 100) {
   alertHtml = ' <span style="color:#ff5e5e;font-size:10px;">⚠ SURCHARGE</span>';
 } else if (a.indice_production > 90) {
-  alertHtml = ' <span style="color:#ff9f43;font-size:10px;">⚡ Carga alta</span>';
+   alertHtml = ' <span style="color:#ff9f43;font-size:10px;">Carga alta</span>';
+  }
 }
     
     return '<tr><td><strong>' + (a.nombre || '—') + '</strong>' + alertHtml + '</td>' +
